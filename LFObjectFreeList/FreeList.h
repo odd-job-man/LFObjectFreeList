@@ -17,5 +17,6 @@ struct FreeList
 BOOL Init(FreeList* pFreeList, int iObjectSize, BOOL bPlacementNew, INIT_PROC initProc_NULLABLE, DESTRUCTOR_PROC destProc_NULLABLE);
 void* Alloc(FreeList* pFreeList);
 void Free(FreeList* pFreeList, void* pData);
+void Clear(FreeList* pFreeList);
 
 

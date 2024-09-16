@@ -6,7 +6,7 @@
 
 constexpr int THREAD_NUM = 4;
 
-constexpr int TEST_NUM = 20000000;
+constexpr int TEST_NUM = 100000;
 
 int arr[TEST_NUM];
 
@@ -70,5 +70,12 @@ int wmain()
         }
     }
 
-    printf("¯~");
+    for (int i = 0; i < TEST_NUM; ++i)
+    {
+        Free(&fr, pArr[i]);
+    }
+
+    Clear(&fr);
+
+    printf("ZZANG~");
 }
