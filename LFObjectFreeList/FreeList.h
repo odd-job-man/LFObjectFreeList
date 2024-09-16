@@ -9,7 +9,7 @@ struct FreeList
 	LONG lSize;
 	BOOL bPlacementNew;
 	ULONGLONG ullMetaAddrCnt;
-	int iObjectSize;
+	LONG lObjectSize;
 	INIT_PROC initProc;
 	DESTRUCTOR_PROC destProc;
 };

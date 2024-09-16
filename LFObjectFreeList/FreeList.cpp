@@ -25,77 +25,81 @@ __forceinline LF_STACK_METADATA* DataToNode(void* pData)
 
 BOOL Init(FreeList* pFreeList, int iObjectSize, BOOL bPlacementNew, INIT_PROC initProc_NULLABLE, DESTRUCTOR_PROC destProc_NULLABLE)
 {
-	pFreeList->lCapacity = 0;
-	pFreeList->lSize = 0;
-	pFreeList->bPlacementNew = bPlacementNew;
-	pFreeList->ullMetaAddrCnt = 0;
-	pFreeList->iObjectSize = iObjectSize;
-	pFreeList->initProc = initProc_NULLABLE;
-	pFreeList->destProc = destProc_NULLABLE;
-	pFreeList->pTop = nullptr;
+	InterlockedExchange(&pFreeList->lCapacity, 0);
+	InterlockedExchange(&pFreeList->lSize, 0);
+	InterlockedExchange((LONG*)&pFreeList->bPlacementNew, bPlacementNew);
+	InterlockedExchange(&pFreeList->ullMetaAddrCnt, 0);
+	InterlockedExchange(&pFreeList->lObjectSize, iObjectSize);
+	InterlockedExchangePointer((PVOID*)&pFreeList->initProc, initProc_NULLABLE);
+	InterlockedExchangePointer((PVOID*)&pFreeList->destProc, destProc_NULLABLE);
+	InterlockedExchangePointer((PVOID*)&pFreeList->pTop, nullptr);
 	return TRUE;
 }
 
 void* Alloc(FreeList* pFreeList)
 {
-	void* pLocalMetaAddrTop;
-	LF_STACK_METADATA* pLocalRealAddrTop;
-	void* pNewMetaAddrTop;
+	void* pLocalMetaTop;
+	LF_STACK_METADATA* pLocalRealTop;
+	void* pNewMetaTop;
 	do
 	{
-		pLocalMetaAddrTop = pFreeList->pTop;
-		if (!pLocalMetaAddrTop)
+		pLocalMetaTop = pFreeList->pTop;
+		if (!pLocalMetaTop)
 		{
 			InterlockedIncrement(&pFreeList->lCapacity);
-			void* pNode = new char[GetNodeSize(pFreeList->iObjectSize)];
+			void* pNode = new char[GetNodeSize(pFreeList->lObjectSize)];
 			// 초기화함수가 정의되어잇다면 플래그 관계없이 최초에는 호출해준다
 			if (pFreeList->initProc)
 				pFreeList->initProc(GetObjectAddr(pNode));
 			return GetObjectAddr(pNode);
 		}
-		pLocalRealAddrTop = (LF_STACK_METADATA*)GetRealAddr(pLocalMetaAddrTop);
-		pNewMetaAddrTop = pLocalRealAddrTop->pMetaNext;
-	} while (InterlockedCompareExchangePointer(&pFreeList->pTop, pNewMetaAddrTop, pLocalMetaAddrTop) != pLocalMetaAddrTop);
+		pLocalRealTop = (LF_STACK_METADATA*)GetRealAddr(pLocalMetaTop);
+		pNewMetaTop = pLocalRealTop->pMetaNext;
+	} while (InterlockedCompareExchangePointer(&pFreeList->pTop, pNewMetaTop, pLocalMetaTop) != pLocalMetaTop);
 
 	// bPlacementNew가 TRUE라면 당연히도 초기화함수는 집어넣엇어야한다
 	if (pFreeList->bPlacementNew)
-		pFreeList->initProc(GetObjectAddr(pLocalRealAddrTop));
+		pFreeList->initProc(GetObjectAddr(pLocalRealTop));
 
 	InterlockedDecrement(&pFreeList->lSize);
-	return GetObjectAddr(pLocalRealAddrTop);
+	return GetObjectAddr(pLocalRealTop);
 }
 
 void Free(FreeList* pFreeList, void* pData)
 {
-	void* pLocalMetaAddrTop;
-	LF_STACK_METADATA* pNewRealAddrTop;
-	void* pNewMetaAddrTop;
+	void* pLocalMetaTop;
+	LF_STACK_METADATA* pNewRealTop;
+	void* pNewMetaTop;
 
 	// bPlacmentNew가 TRUE이더라도 소멸자는 없을수 잇음
 	if (pFreeList->bPlacementNew && pFreeList->destProc)
 		pFreeList->destProc(pData);
 	do
 	{
-		pLocalMetaAddrTop = pFreeList->pTop;
-		pNewRealAddrTop = DataToNode(pData);
-		pNewRealAddrTop->pMetaNext = pLocalMetaAddrTop;
-		pNewMetaAddrTop = GetMetaAddr(GetCnt(&pFreeList->ullMetaAddrCnt), pNewRealAddrTop);
-	} while (InterlockedCompareExchangePointer((PVOID*)&pFreeList->pTop, (PVOID)pNewMetaAddrTop, (PVOID)pLocalMetaAddrTop) != pLocalMetaAddrTop);
+		pLocalMetaTop = pFreeList->pTop;
+		pNewRealTop = DataToNode(pData);
+		pNewRealTop->pMetaNext = pLocalMetaTop;
+		pNewMetaTop = GetMetaAddr(GetCnt(&pFreeList->ullMetaAddrCnt), pNewRealTop);
+	} while (InterlockedCompareExchangePointer((PVOID*)&pFreeList->pTop, (PVOID)pNewMetaTop, (PVOID)pLocalMetaTop) != pLocalMetaTop);
 
 	InterlockedIncrement(&pFreeList->lSize);
 }
 
 void Clear(FreeList* pFreeList)
 {
-	LF_STACK_METADATA* pRealTop = (LF_STACK_METADATA*)GetRealAddr(pFreeList->pTop);
+	LF_STACK_METADATA* pLocalRealTop = (LF_STACK_METADATA*)GetRealAddr(pFreeList->pTop);
 	LF_STACK_METADATA* pNodeToDelete;
+
+	if (!pLocalRealTop)
+		return;
+
 	do
 	{
-		pNodeToDelete = pRealTop;
+		pNodeToDelete = pLocalRealTop;
 		pFreeList->pTop = pNodeToDelete->pMetaNext;
-		pRealTop = (LF_STACK_METADATA*)GetRealAddr(pNodeToDelete->pMetaNext);
+		pLocalRealTop = (LF_STACK_METADATA*)GetRealAddr(pNodeToDelete->pMetaNext);
 		InterlockedDecrement(&pFreeList->lCapacity);
 		InterlockedDecrement(&pFreeList->lSize);
 		delete[] pNodeToDelete;
-	} while (pRealTop);
+	} while (pLocalRealTop);
 }
