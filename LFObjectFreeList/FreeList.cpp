@@ -38,22 +38,21 @@ BOOL Init(FreeList* pFreeList, int iObjectSize, BOOL bPlacementNew, INIT_PROC in
 
 void* Alloc(FreeList* pFreeList)
 {
-	void* pLocalMetaAddrTop = pFreeList->pTop;
-	if (!pLocalMetaAddrTop)
-	{
-		InterlockedIncrement(&pFreeList->lCapacity);
-		void* pNode = new char[GetNodeSize(pFreeList->iObjectSize)];
-		// 초기화함수가 정의되어잇다면 플래그 관계없이 최초에는 호출해준다
-		if (pFreeList->initProc)
-			pFreeList->initProc(GetObjectAddr(pNode));
-		return GetObjectAddr(pNode);
-	}
-
+	void* pLocalMetaAddrTop;
 	LF_STACK_METADATA* pLocalRealAddrTop;
 	void* pNewMetaAddrTop;
 	do
 	{
 		pLocalMetaAddrTop = pFreeList->pTop;
+		if (!pLocalMetaAddrTop)
+		{
+			InterlockedIncrement(&pFreeList->lCapacity);
+			void* pNode = new char[GetNodeSize(pFreeList->iObjectSize)];
+			// 초기화함수가 정의되어잇다면 플래그 관계없이 최초에는 호출해준다
+			if (pFreeList->initProc)
+				pFreeList->initProc(GetObjectAddr(pNode));
+			return GetObjectAddr(pNode);
+		}
 		pLocalRealAddrTop = (LF_STACK_METADATA*)GetRealAddr(pLocalMetaAddrTop);
 		pNewMetaAddrTop = pLocalRealAddrTop->pMetaNext;
 	} while (InterlockedCompareExchangePointer(&pFreeList->pTop, pNewMetaAddrTop, pLocalMetaAddrTop) != pLocalMetaAddrTop);
