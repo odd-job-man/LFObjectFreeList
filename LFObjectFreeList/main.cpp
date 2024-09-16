@@ -5,7 +5,6 @@
 #include "FreeList.h"
 #define STACK_TEST
 
-
 #ifdef FREELIST_TEST
 constexpr int THREAD_NUM = 4;
 
@@ -108,7 +107,6 @@ unsigned _stdcall ThreadProc(void* pParam)
         }
     }
 }
-
 
 
 int main()
