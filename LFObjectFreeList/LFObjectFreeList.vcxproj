@@ -135,6 +135,7 @@
   <ItemGroup>
     <ClCompile Include="CheckMetaCntBits.cpp" />
     <ClCompile Include="FreeList.cpp" />
+    <ClCompile Include="LFStack.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
