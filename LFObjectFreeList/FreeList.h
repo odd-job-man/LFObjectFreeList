@@ -4,7 +4,7 @@ typedef void(*DESTRUCTOR_PROC)(void*);
 
 struct FreeList
 {
-	void* pTop;
+	void* pMetaTop;
 	LONG lCapacity;
 	LONG lSize;
 	BOOL bPlacementNew;

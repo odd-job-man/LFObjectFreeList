@@ -4,9 +4,9 @@
 #include "CheckMetaCntBits.h"
 #include "FreeList.h"
 
-constexpr int THREAD_NUM = 100000;
+constexpr int THREAD_NUM = 4;
 
-constexpr int TEST_NUM = 100000;
+constexpr int TEST_NUM = 10000000;
 
 int arr[TEST_NUM];
 
