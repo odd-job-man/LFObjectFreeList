@@ -1,9 +1,8 @@
 #include <Windows.h>
 #include <process.h>
 #include <stdio.h>
-#include "CheckMetaCntBits.h"
+//#include "CheckMetaCntBits.h"
 #include "FreeList.h"
-#define STACK_TEST
 
 #ifdef FREELIST_TEST
 constexpr int THREAD_NUM = 4;
@@ -124,3 +123,26 @@ int main()
     WaitForMultipleObjects(2, hThreadArr, TRUE, INFINITE);
 }
 #endif
+
+#include "CLockFreeObjectPool.h"
+
+class Test
+{
+public:
+    Test()
+    {
+        printf("constructor\n");
+    }
+
+    ~Test()
+    {
+        printf("destructor\n");
+    }
+};
+
+int main()
+{
+    CLockFreeObjectPool<Test, false> pool;
+    Test* p1 = pool.Alloc();
+    pool.Free(p1);
+}

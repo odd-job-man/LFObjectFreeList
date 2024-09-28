@@ -68,8 +68,8 @@ void* Alloc(FreeList* pFreeList)
 void Free(FreeList* pFreeList, void* pData)
 {
 	void* pLocalMetaTop;
-	LF_STACK_METADATA* pNewRealTop;
-	void* pNewMetaTop;
+	LF_STACK_METADATA* pNewRealTop = DataToNode(pData);
+	void* pNewMetaTop = GetMetaAddr(GetCnt(&pFreeList->ullMetaAddrCnt), pNewRealTop);
 
 	// bPlacmentNew가 TRUE이더라도 소멸자는 없을수 잇음
 	if (pFreeList->bPlacementNew && pFreeList->destProc)
@@ -77,9 +77,7 @@ void Free(FreeList* pFreeList, void* pData)
 	do
 	{
 		pLocalMetaTop = pFreeList->pMetaTop;
-		pNewRealTop = DataToNode(pData);
 		pNewRealTop->pMetaNext = pLocalMetaTop;
-		pNewMetaTop = GetMetaAddr(GetCnt(&pFreeList->ullMetaAddrCnt), pNewRealTop);
 	} while (InterlockedCompareExchangePointer((PVOID*)&pFreeList->pMetaTop, (PVOID)pNewMetaTop, (PVOID)pLocalMetaTop) != pLocalMetaTop);
 
 	InterlockedIncrement(&pFreeList->lSize);

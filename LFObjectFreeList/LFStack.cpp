@@ -13,12 +13,11 @@ void InitLFStack(LFStack* pStack)
 void Push_LF_STACK(LFStack* pStack, LF_STACK_METADATA* pNew)
 {
 	void* pLocalMetaTop;
-	void* pNewMetaTop;
+	void* pNewMetaTop = GetMetaAddr(GetCnt(&pStack->metaCounter), pNew);
 	do
 	{
 		pLocalMetaTop = pStack->pMetaTop;
 		pNew->pMetaNext = pLocalMetaTop;
-		pNewMetaTop = GetMetaAddr(GetCnt(&pStack->metaCounter), pNew);
 	} while (InterlockedCompareExchangePointer((PVOID*)&pStack->pMetaTop, (PVOID)pNewMetaTop, (PVOID)pLocalMetaTop) != pLocalMetaTop);
 
 	InterlockedIncrement(&pStack->lNum);

@@ -24,6 +24,12 @@
     <ClInclude Include="LFStack.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="CLockFreeObjectPool.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CAddressTranslator.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CheckMetaCntBits.cpp">
