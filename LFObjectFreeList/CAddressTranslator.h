@@ -29,22 +29,19 @@ public:
 			return false;
 	}
 
-	static uint64_t GetCnt(uint64_t* pCnt)
+	static inline uint64_t GetCnt(uint64_t* pCnt)
 	{
-		uint64_t ret = InterlockedIncrement(pCnt) - 1;
-		return ret % COUNTER_MAX;
+		return (InterlockedIncrement(pCnt) - 1) % COUNTER_MAX;
 	}
 
-	static uintptr_t GetMetaAddr(size_t cnt, uintptr_t realAddr)
+	static inline uintptr_t GetMetaAddr(size_t cnt, uintptr_t realAddr)
 	{
-		uintptr_t ret = (uintptr_t)(cnt << NON_ZERO_COUNT) | realAddr;
-		return ret;
+		return (uintptr_t)(cnt << NON_ZERO_COUNT) | realAddr;
 	}
 
-	static uintptr_t GetRealAddr(uintptr_t metaAddr)
+	static inline uintptr_t GetRealAddr(uintptr_t metaAddr)
 	{
-		uintptr_t ret = metaAddr & REAL_ADDR_MASK;
-		return ret;
+		return metaAddr & REAL_ADDR_MASK;
 	}
 
 };

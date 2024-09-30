@@ -105,6 +105,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,6 +123,7 @@
       <ConformanceMode>true</ConformanceMode>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -133,6 +136,8 @@
     <ClInclude Include="CAddressTranslator.h" />
     <ClInclude Include="CheckMetaCntBits.h" />
     <ClInclude Include="CLockFreeObjectPool.h" />
+    <ClInclude Include="CLockFreeQueue.h" />
+    <ClInclude Include="CLockFreeStack.h" />
     <ClInclude Include="FreeList.h" />
     <ClInclude Include="LFStack.h" />
   </ItemGroup>

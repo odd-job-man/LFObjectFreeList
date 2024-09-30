@@ -9,29 +9,34 @@ class CLockFreeObjectPool
 	struct FreeListNode
 	{
 		T data;
-		uintptr_t metaNext = 0;
+		uintptr_t metaNext;
 
-		template<typename... Args>
-		FreeListNode(Args... args)
-			:data{ args... }
+		template<typename... Types>
+		FreeListNode(Types&&... args)
+			:data{ std::forward<Types>(args)... }, metaNext{ 0 }
 		{
 		}
 
-		static FreeListNode* DataToNode(T* pData) 
+		static inline FreeListNode* DataToNode(T* pData) 
 		{
 			return (FreeListNode*)((char*)pData - offsetof(FreeListNode, data));
 		}
-
 	};
 
-	alignas(64) uintptr_t metaTop_ = 0;
-	alignas(64) LONG capacity_ = 0;
-	alignas(64) LONG size_ = 0;
-	alignas(64) size_t metaAddrCnt = 0;
+	alignas(64) uintptr_t metaTop_;
+	alignas(64) long capacity_;
+	alignas(64) long size_;
+	alignas(64) size_t metaCnt;
 
 public:
-	template<typename... Types>
-	T* Alloc(Types... args)
+	CLockFreeObjectPool() 
+		:metaTop_{ 0 }, capacity_{ 0 }, size_{ 0 }
+	{
+		InterlockedExchange(&metaCnt, 0);
+	}
+
+	template<typename... Types> requires (bPlacementNew || (sizeof...(Types) == 0))
+	T* Alloc(Types&&... args) 
 	{
 		uintptr_t metaTop;
 		FreeListNode* pRealTop;
@@ -43,7 +48,7 @@ public:
 			if (!metaTop)
 			{
 				InterlockedIncrement(&capacity_);
-				FreeListNode* pNode = new FreeListNode{ args... };
+				FreeListNode* pNode = new FreeListNode{ std::forward<Types>(args)... };
 				return &pNode->data;
 			}
 			pRealTop = (FreeListNode*)CAddressTranslator::GetRealAddr(metaTop);
@@ -52,7 +57,7 @@ public:
 
 		if constexpr (bPlacementNew)
 		{
-			new(&pRealTop->data)T{ args... };
+			new(&pRealTop->data)T{ std::forward<Types>(args)... };
 		}
 
 		InterlockedDecrement(&size_);
@@ -71,10 +76,9 @@ public:
 
 		uintptr_t newMetaTop = CAddressTranslator::GetMetaAddr
 		(
-			CAddressTranslator::GetCnt(&metaAddrCnt), 
+			CAddressTranslator::GetCnt(&metaCnt), 
 			(uintptr_t)pNewRealTop
 		);
-
 
 		do
 		{
