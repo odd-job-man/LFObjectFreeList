@@ -134,17 +134,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CAddressTranslator.h" />
-    <ClInclude Include="CheckMetaCntBits.h" />
     <ClInclude Include="CLockFreeObjectPool.h" />
     <ClInclude Include="CLockFreeQueue.h" />
     <ClInclude Include="CLockFreeStack.h" />
-    <ClInclude Include="FreeList.h" />
-    <ClInclude Include="LFStack.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CheckMetaCntBits.cpp" />
-    <ClCompile Include="FreeList.cpp" />
-    <ClCompile Include="LFStack.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

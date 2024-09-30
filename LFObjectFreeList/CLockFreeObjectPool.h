@@ -3,6 +3,13 @@
 #include <new>
 #include "CAddressTranslator.h"
 
+struct sample
+{
+	int a;
+	int b;
+	int c;
+};
+
 template<typename T, bool bPlacementNew>
 class CLockFreeObjectPool
 {
@@ -36,7 +43,7 @@ public:
 	}
 
 	template<typename... Types> requires (bPlacementNew || (sizeof...(Types) == 0))
-	T* Alloc(Types&&... args) 
+	T* Alloc(Types&&... args)
 	{
 		uintptr_t metaTop;
 		FreeListNode* pRealTop;

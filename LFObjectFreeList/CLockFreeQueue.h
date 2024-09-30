@@ -17,7 +17,7 @@ private:
 		{}
 
 		Node(T&& data, uint64_t meta)
-			:data_{ data },
+			:data_{ std::forward<T>(data) }, 
 			metaNext_{ CAddressTranslator::GetMetaAddr(meta, (uintptr_t)nullptr) }
 		{}
 	};
@@ -75,23 +75,23 @@ public:
 
 		while (true)
 		{
-			uintptr_t pMetaTail = metaTail_;
-			uintptr_t pMetaHead = metaHead_;
-			Node* pRealHead_ = (Node*)CAddressTranslator::GetRealAddr(pMetaHead);
-			uintptr_t pMetaNext = pRealHead_->metaNext_;
+			uintptr_t metaTail = metaTail_;
+			uintptr_t metaHead = metaHead_;
+			Node* pRealHead_ = (Node*)CAddressTranslator::GetRealAddr(metaHead);
+			uintptr_t metaNext = pRealHead_->metaNext_;
 
 
-			if (CAddressTranslator::GetRealAddr(pMetaNext) == (uintptr_t)nullptr)
+			if (CAddressTranslator::GetRealAddr(metaNext) == (uintptr_t)nullptr)
 				continue;
 
-			if (pMetaTail == pMetaHead)
+			if (metaTail == metaHead)
 			{
-				InterlockedCompareExchange(&metaTail_, pMetaNext, pMetaTail);
+				InterlockedCompareExchange(&metaTail_, metaNext, metaTail);
 				continue;
 			}
 
-			T retData = ((Node*)CAddressTranslator::GetRealAddr(pMetaNext))->data_;
-			if (InterlockedCompareExchange(&metaHead_, pMetaNext, pMetaHead) == pMetaHead)
+			T retData = ((Node*)CAddressTranslator::GetRealAddr(metaNext))->data_;
+			if (InterlockedCompareExchange(&metaHead_, metaNext, metaHead) == metaHead)
 			{
 				nodePool_.Free(pRealHead_);
 				return retData;
