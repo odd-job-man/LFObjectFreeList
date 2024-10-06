@@ -26,9 +26,9 @@ private:
 	alignas(64) uintptr_t metaTail_;
 	alignas(64) uintptr_t metaHead_;
 	alignas(64) uint64_t metaCnt_;
-	alignas(64) long num_;
 
 public:
+	alignas(64) long num_;
 	CLockFreeQueue()
 		:metaCnt_{ 0 }, num_{ 0 }
 	{

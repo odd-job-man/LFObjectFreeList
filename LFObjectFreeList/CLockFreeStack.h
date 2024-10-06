@@ -1,10 +1,10 @@
 #pragma once
 #include <cstdint>
 #include <windows.h>
+#include <optional>
 
 #include "CLockFreeObjectPool.h"
 
-#include <optional>
 
 template<typename T>
 class CLockFreeStack
@@ -23,9 +23,10 @@ private:
 	CLockFreeObjectPool<Node, true> pool_;
 	alignas(64) uintptr_t metaTop_;
 	alignas(64) size_t metaCnt_;
-	alignas(64) long num_;
 
 public:
+	alignas(64) long num_;
+
 	CLockFreeStack()
 		:metaTop_{ 0 }, metaCnt_{ 0 }
 	{
@@ -64,13 +65,14 @@ public:
 			{
 				return std::nullopt;
 			}
-
 			realTop = (Node*)CAddressTranslator::GetRealAddr(metaTop);
 			newMetaTop = realTop->metaNext_;
 		} while (InterlockedCompareExchange(&metaTop_, newMetaTop, metaTop) != metaTop);
 
+		T data = std::move(realTop->data_);
+		pool_.Free(realTop);
 		InterlockedDecrement(&num_);
-		return realTop->data_;
+		return data;
 	}
 
 

@@ -3,13 +3,6 @@
 #include <new>
 #include "CAddressTranslator.h"
 
-struct sample
-{
-	int a;
-	int b;
-	int c;
-};
-
 template<typename T, bool bPlacementNew>
 class CLockFreeObjectPool
 {
