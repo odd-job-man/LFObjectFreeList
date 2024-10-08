@@ -3,6 +3,8 @@
 #include <windows.h>
 #include <optional>
 #include "CLockFreeObjectPool.h"
+
+
 template <typename T>
 class CLockFreeQueue
 {
@@ -115,6 +117,7 @@ public:
 			}
 		}
 	}
+
 	__forceinline const int long GetSize() const
 	{
 		return num_;
