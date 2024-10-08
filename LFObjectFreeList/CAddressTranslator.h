@@ -39,6 +39,11 @@ public:
 		return (uintptr_t)(cnt << NON_ZERO_COUNT) | realAddr;
 	}
 
+	static inline uintptr_t ExtractMetaCnt(uintptr_t metaAddr)
+	{
+		return metaAddr & ~REAL_ADDR_MASK;
+	}
+
 	static inline uintptr_t GetRealAddr(uintptr_t metaAddr)
 	{
 		return metaAddr & REAL_ADDR_MASK;

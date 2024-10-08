@@ -153,7 +153,7 @@ CLockFreeQueue<uint64_t> q;
 unsigned ThreadProc(void* pParam);
 
 constexpr auto LOOP = 2;
-constexpr auto THREAD_NUM = 2;
+constexpr auto THREAD_NUM = 4;
 
 uint64_t g_enqCnt = 0;
 
@@ -165,6 +165,8 @@ int main()
 
     hThread[0] = (HANDLE)_beginthreadex(nullptr, 0, ThreadProc, (void*)1, CREATE_SUSPENDED, nullptr);
     hThread[1] = (HANDLE)_beginthreadex(nullptr, 0, ThreadProc, (void*)0, CREATE_SUSPENDED, nullptr);
+    hThread[2] = (HANDLE)_beginthreadex(nullptr, 0, ThreadProc, (void*)0, CREATE_SUSPENDED, nullptr);
+    hThread[3] = (HANDLE)_beginthreadex(nullptr, 0, ThreadProc, (void*)0, CREATE_SUSPENDED, nullptr);
 
     for (int i = 0; i < THREAD_NUM; ++i)
     {
