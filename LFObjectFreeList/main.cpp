@@ -146,9 +146,11 @@ int main()
 
 #ifdef QUEUE_TEST
 #include "CLockFreeQueue.h"
+#include "CLockFreeObjectPoolBucket.h"
 
 HANDLE hThread[2];
 CLockFreeQueue<uint64_t> q;
+TlsLockFreeObjectPool<uint64_t, true> p;
 
 unsigned ThreadProc(void* pParam);
 

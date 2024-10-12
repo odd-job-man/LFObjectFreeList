@@ -135,6 +135,7 @@
   <ItemGroup>
     <ClInclude Include="CAddressTranslator.h" />
     <ClInclude Include="CLockFreeObjectPool.h" />
+    <ClInclude Include="CLockFreeObjectPoolBucket.h" />
     <ClInclude Include="CLockFreeQueue.h" />
     <ClInclude Include="CLockFreeStack.h" />
   </ItemGroup>
