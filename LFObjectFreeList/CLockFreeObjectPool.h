@@ -2,6 +2,7 @@
 #include <utility>
 #include <new>
 #include "CAddressTranslator.h"
+#include "MultithreadProfiler.h"
 
 template<typename T, bool bPlacementNew>
 class CLockFreeObjectPool
@@ -38,6 +39,7 @@ public:
 	template<typename... Types> requires (bPlacementNew || (sizeof...(Types) == 0))
 	T* Alloc(Types&&... args)
 	{
+		PROFILE(1, "Alloc From Original Pool");
 		uintptr_t metaTop;
 		FreeListNode* pRealTop;
 		uintptr_t newMetaTop;
@@ -66,6 +68,7 @@ public:
 
 	void Free(T* pData)
 	{
+		PROFILE(1,"Free To Original Bucket Pool")
 		uintptr_t metaTop;
 		FreeListNode* pNewRealTop = FreeListNode::DataToNode(pData);
 

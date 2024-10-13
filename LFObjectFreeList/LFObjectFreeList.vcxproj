@@ -135,12 +135,14 @@
   <ItemGroup>
     <ClInclude Include="CAddressTranslator.h" />
     <ClInclude Include="CLockFreeObjectPool.h" />
-    <ClInclude Include="CLockFreeObjectPoolBucket.h" />
+    <ClInclude Include="CTlsObjectPool.h" />
     <ClInclude Include="CLockFreeQueue.h" />
     <ClInclude Include="CLockFreeStack.h" />
+    <ClInclude Include="MultithreadProfiler.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MultithreadProfiler.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,7 +3,9 @@
 #include <windows.h>
 #include <optional>
 
+#include "MultithreadProfiler.h"
 #include "CLockFreeObjectPool.h"
+#include "CTlsObjectPool.h"
 
 
 template<typename T>
@@ -20,7 +22,14 @@ private:
 		}
 	};
 
-	CLockFreeObjectPool<Node, true> pool_;
+#ifdef ORIGINAL
+	using POOL = CLockFreeObjectPool<Node, true>;
+#endif 
+#ifdef BUCKET
+	using POOL = CTlsObjectPool<Node, true>;
+#endif
+
+	POOL pool_;
 	alignas(64) uintptr_t metaTop_;
 	alignas(64) size_t metaCnt_;
 

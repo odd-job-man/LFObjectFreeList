@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "CLockFreeObjectPool.h"
 
-#define QUEUE_TEST
+#define POOL_BUCKET_TEST
 
 #ifdef FREELIST_TEST
 constexpr int THREAD_NUM = 4;
@@ -150,7 +150,7 @@ int main()
 
 HANDLE hThread[2];
 CLockFreeQueue<uint64_t> q;
-TlsLockFreeObjectPool<uint64_t, true> p;
+//CTlsObjectPool<uint64_t, true> p;
 
 unsigned ThreadProc(void* pParam);
 
@@ -163,7 +163,6 @@ int main()
 {
     if (!CAddressTranslator::CheckMetaCntBits())
         __debugbreak();
-
 
     hThread[0] = (HANDLE)_beginthreadex(nullptr, 0, ThreadProc, (void*)1, CREATE_SUSPENDED, nullptr);
     hThread[1] = (HANDLE)_beginthreadex(nullptr, 0, ThreadProc, (void*)0, CREATE_SUSPENDED, nullptr);
@@ -196,3 +195,75 @@ unsigned ThreadProc(void* pParam)
     }
 }
 #endif
+
+
+#define BUCKET
+//#define ORIGINAL
+#include <Psapi.h>
+#include <iostream>
+#include "CLockFreeStack.h"
+#include "MultithreadProfiler.h"
+
+constexpr auto LOOP = 100;
+constexpr auto THREAD_NUM = 4;
+CLockFreeStack<uint64_t> g_Stack;
+unsigned ThreadProc(void* pParam)
+{
+    while (true)
+    {
+        for (int i = 0; i < LOOP; ++i)
+        {
+            g_Stack.Push(i);
+        }
+
+        for (int i = 0; i < LOOP; ++i)
+        {
+            g_Stack.Pop();
+        }
+    }
+}
+
+unsigned __stdcall Monitoring(void* pParam)
+{
+    PROCESS_MEMORY_COUNTERS_EX pmcEx;
+    // 현재 프로세스 핸들 가져오기
+    HANDLE hProcess = GetCurrentProcess();
+
+    while (1)
+    {
+        Sleep(1000);
+        GetProcessMemoryInfo(hProcess, (PROCESS_MEMORY_COUNTERS*)&pmcEx, sizeof(pmcEx));
+        std::cout << "Private Bytes (User-mode allocation): " << pmcEx.PrivateUsage / 1024 << " KB" << std::endl;
+        if (GetAsyncKeyState(VK_BACK) & 0x01)
+        {
+            PROFILER::Reset();
+            std::cout << "Profiler Reset!" << std::endl;
+        }
+
+        if (GetAsyncKeyState(VK_RETURN) & 0x01)
+        {
+            PROFILER::ProfileDataOutText("Profile.txt");
+            std::cout << "Profiler DataTextOut!" << std::endl;
+        }
+    }
+}
+
+
+int main()
+{
+    PROFILER::Init();
+    HANDLE hThread[THREAD_NUM];
+    for (int i = 0; i < THREAD_NUM; ++i)
+    {
+        hThread[i] = (HANDLE)_beginthreadex(nullptr, 0, ThreadProc, (void*)0, CREATE_SUSPENDED, nullptr);
+    }
+
+    for (int i = 0; i < THREAD_NUM; ++i)
+    {
+        ResumeThread(hThread[i]);
+    }
+
+    HANDLE hMontoring = (HANDLE)_beginthreadex(nullptr, 0, Monitoring, nullptr, 0, nullptr);
+    WaitForMultipleObjects(THREAD_NUM, hThread, TRUE, INFINITE);
+}
+
