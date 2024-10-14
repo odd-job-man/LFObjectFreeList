@@ -1,7 +1,7 @@
 #pragma once
 #include <Windows.h>
+#define PROFILE_ACTIVATE
 
-#define PROFILE_ACTIVATE 
 
 #ifdef PROFILE_ACTIVATE
 struct PROFILE_SAMPLE

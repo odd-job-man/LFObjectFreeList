@@ -197,28 +197,54 @@ unsigned ThreadProc(void* pParam)
 #endif
 
 
-#define BUCKET
-//#define ORIGINAL
+//#define BUCKET
 #include <Psapi.h>
 #include <iostream>
-#include "CLockFreeStack.h"
+#define STACK
+#include "CLockFreeObjectPool.h"
+#include "CTlsObjectPool.h"
 #include "MultithreadProfiler.h"
 
 constexpr auto LOOP = 100;
 constexpr auto THREAD_NUM = 4;
-CLockFreeStack<uint64_t> g_Stack;
+#define Tls
+#ifdef ORIGINAL
+CLockFreeObjectPool<int, true>g_pool;
+#else
+CTlsObjectPool<int, true> g_pool;
+#endif
+
 unsigned ThreadProc(void* pParam)
 {
+    int* testArr[LOOP];
     while (true)
     {
         for (int i = 0; i < LOOP; ++i)
         {
-            g_Stack.Push(i);
+#ifdef ORIGINAL
+		    PROFILE(1, "Alloc From Original Pool")
+#else
+#ifdef QUEUE
+		    PROFILE(1, "Alloc From Tls Bucket Pool Q")
+#else
+            PROFILE(1, "Alloc From Tls Bucket Pool Stack")
+#endif
+#endif
+            testArr[i] = g_pool.Alloc(i);
         }
 
         for (int i = 0; i < LOOP; ++i)
         {
-            g_Stack.Pop();
+#ifdef ORIGINAL
+		    PROFILE(1,"Free To Original Pool")
+#else
+#ifdef QUEUE
+	    	PROFILE(1, "Free From Tls Bucket Pool Q");
+#else
+            PROFILE(1, "Free From Tls Bucket Pool Stack")
+#endif
+#endif
+            g_pool.Free(testArr[i]);
         }
     }
 }

@@ -22,13 +22,8 @@ private:
 		}
 	};
 
-#ifdef ORIGINAL
 	using POOL = CLockFreeObjectPool<Node, true>;
-#endif 
-#ifdef BUCKET
-	using POOL = CTlsObjectPool<Node, true>;
-#endif
-
+	//using POOL = CTlsObjectPool<Node, true>;
 	POOL pool_;
 	alignas(64) uintptr_t metaTop_;
 	alignas(64) size_t metaCnt_;

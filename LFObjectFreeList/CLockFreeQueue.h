@@ -31,7 +31,7 @@ private:
 public:
 	alignas(64) long num_;
 	CLockFreeQueue()
-		:metaCnt_{ 0 }, num_{ 0 }
+		:metaCnt_{ 0 }
 	{
 		InterlockedExchange(&num_, 0);
 		uint64_t meta = CAddressTranslator::GetCnt(&metaCnt_);
