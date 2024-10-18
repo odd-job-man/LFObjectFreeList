@@ -197,6 +197,7 @@ unsigned ThreadProc(void* pParam)
 #endif
 
 
+#ifdef TLS_POOL_TEST
 //#define BUCKET
 #include <Psapi.h>
 #include <iostream>
@@ -292,4 +293,52 @@ int main()
     HANDLE hMontoring = (HANDLE)_beginthreadex(nullptr, 0, Monitoring, nullptr, 0, nullptr);
     WaitForMultipleObjects(THREAD_NUM, hThread, TRUE, INFINITE);
 }
+#endif
 
+
+
+#include <iostream>
+#include "CLockFreeQueue.h"
+
+constexpr auto THREAD_NUM = 4;
+constexpr auto Q_NUM = 2;
+CLockFreeQueue<uint64_t> g_Q[Q_NUM];
+
+unsigned __stdcall ThreadProc(void* pParam)
+{
+    uint64_t idx = (uint64_t)pParam;
+    while (1)
+    {
+        for (int i = 0; i < 1; ++i)
+        {
+            g_Q[idx].Enqueue(idx);
+        }
+        for (int i = 0; i < 1; ++i)
+        {
+            auto ret = g_Q[idx].Dequeue().value();
+            if (ret != idx)
+            {
+                 __debugbreak();
+            }
+        }
+    }
+    return 0;
+}
+
+
+int main()
+{
+    HANDLE hThread[THREAD_NUM];
+    for (int i = 0; i < THREAD_NUM; ++i)
+    {
+        hThread[i] = (HANDLE)_beginthreadex(nullptr, 0, ThreadProc, (void*)(i % Q_NUM), CREATE_SUSPENDED, nullptr);
+    }
+
+    for (int i = 0; i < THREAD_NUM; ++i)
+    {
+        ResumeThread(hThread[i]);
+    }
+
+    WaitForMultipleObjects(THREAD_NUM, hThread, TRUE, INFINITE);
+    return 0;
+}

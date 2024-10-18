@@ -2,14 +2,14 @@
 #include <cstdint>
 #include <windows.h>
 
-class CAddressTranslator
-{
-	static constexpr size_t ZERO_COUNT = 17;
-	static constexpr size_t NON_ZERO_COUNT = 64 - ZERO_COUNT;
-	static constexpr uintptr_t REAL_ADDR_MASK = 0x00007FFFFFFFFFFF;
-	static constexpr size_t COUNTER_MAX = 131071;
+static constexpr size_t ZERO_COUNT = 17;
+static constexpr size_t NON_ZERO_COUNT = 64 - ZERO_COUNT;
+static constexpr uintptr_t REAL_ADDR_MASK = 0x00007FFFFFFFFFFF;
 
-public:
+namespace CAddressTranslator
+{
+	static constexpr size_t COUNTER_MAX = 500;
+	//	131071;
 	static bool CheckMetaCntBits()
 	{
 		SYSTEM_INFO si;
@@ -29,24 +29,25 @@ public:
 			return false;
 	}
 
-	static inline uint64_t GetCnt(uint64_t* pCnt)
+	inline uint64_t GetCnt(uint64_t* pCnt)
 	{
 		return (InterlockedIncrement(pCnt) - 1) % COUNTER_MAX;
 	}
 
-	static inline uintptr_t GetMetaAddr(size_t cnt, uintptr_t realAddr)
+	inline uintptr_t GetMetaAddr(size_t cnt, uintptr_t realAddr)
 	{
 		return (uintptr_t)(cnt << NON_ZERO_COUNT) | realAddr;
 	}
 
-	static inline uintptr_t ExtractMetaCnt(uintptr_t metaAddr)
+	inline uintptr_t ExtractMetaCnt(uintptr_t metaAddr)
 	{
 		return metaAddr & ~REAL_ADDR_MASK;
 	}
 
-	static inline uintptr_t GetRealAddr(uintptr_t metaAddr)
+	inline uintptr_t GetRealAddr(uintptr_t metaAddr)
 	{
 		return metaAddr & REAL_ADDR_MASK;
 	}
 
 };
+
